@@ -8,18 +8,81 @@ let windChart = null;
 
 const KMH_TO_KNOTS = 1 / 1.852;
 
+// --- Vordefinierte Stationen ---
+const PRESET_STATIONS = [
+  { name: 'Hamburg', lat: 53.5511, lon: 9.9937 },
+  { name: 'Berlin', lat: 52.5200, lon: 13.4050 },
+  { name: 'München', lat: 48.1351, lon: 11.5820 },
+  { name: 'Köln', lat: 50.9375, lon: 6.9603 },
+  { name: 'Frankfurt', lat: 50.1109, lon: 8.6821 },
+  { name: 'Stuttgart', lat: 48.7758, lon: 9.1829 },
+  { name: 'Düsseldorf', lat: 51.2277, lon: 6.7735 },
+  { name: 'Leipzig', lat: 51.3397, lon: 12.3731 },
+  { name: 'Dresden', lat: 51.0504, lon: 13.7373 },
+  { name: 'Hannover', lat: 52.3759, lon: 9.7320 },
+  { name: 'Bremen', lat: 53.0793, lon: 8.8017 },
+  { name: 'Nürnberg', lat: 49.4521, lon: 11.0767 },
+  { name: 'Freiburg', lat: 47.9990, lon: 7.8421 },
+  { name: 'Freudenstadt', lat: 48.4628, lon: 8.4108 },
+  { name: 'Sylt', lat: 54.9079, lon: 8.3278 },
+  { name: 'Zugspitze', lat: 47.4211, lon: 10.9853 },
+  { name: 'Wien', lat: 48.2082, lon: 16.3738 },
+  { name: 'Zürich', lat: 47.3769, lon: 8.5417 },
+];
+
 // --- Geocoding & Search ---
 const searchInput = document.getElementById('search-input');
 const searchResults = document.getElementById('search-results');
 const loadingIndicator = document.getElementById('loading-indicator');
 let debounceTimer = null;
 
+function showPresets(filter) {
+  searchResults.innerHTML = '';
+  const q = (filter || '').toLowerCase();
+  const matches = q.length === 0
+    ? PRESET_STATIONS
+    : PRESET_STATIONS.filter(s => s.name.toLowerCase().includes(q));
+
+  matches.forEach(s => {
+    const div = document.createElement('div');
+    div.className = 'result-item';
+    div.textContent = s.name;
+    div.addEventListener('click', () => {
+      searchInput.value = s.name;
+      searchResults.style.display = 'none';
+      loadForecast(s.lat, s.lon, s.name);
+    });
+    searchResults.appendChild(div);
+  });
+
+  if (matches.length > 0) {
+    searchResults.style.display = 'block';
+  } else if (q.length >= 2) {
+    // No preset match — search via API
+    searchLocation(q);
+    return;
+  } else {
+    searchResults.style.display = 'none';
+  }
+}
+
+// Show presets on focus/click
+searchInput.addEventListener('focus', () => showPresets(searchInput.value.trim()));
+searchInput.addEventListener('click', () => showPresets(searchInput.value.trim()));
+
 searchInput.addEventListener('input', () => {
   clearTimeout(debounceTimer);
   const query = searchInput.value.trim();
-  if (query.length < 2) { searchResults.style.display = 'none'; return; }
+  // First check presets
+  const presetMatch = PRESET_STATIONS.some(s => s.name.toLowerCase().includes(query.toLowerCase()));
+  if (presetMatch || query.length < 2) {
+    showPresets(query);
+    return;
+  }
+  // No preset match — search API with debounce
   debounceTimer = setTimeout(() => searchLocation(query), 300);
 });
+
 searchInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') {
     clearTimeout(debounceTimer);
@@ -27,6 +90,7 @@ searchInput.addEventListener('keydown', (e) => {
     if (q.length >= 2) searchLocation(q);
   }
 });
+
 document.addEventListener('click', (e) => {
   if (!searchResults.contains(e.target) && e.target !== searchInput)
     searchResults.style.display = 'none';
