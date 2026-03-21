@@ -8,6 +8,12 @@ let windChart = null;
 
 const KMH_TO_KNOTS = 1 / 1.852;
 
+// --- Forecast Range ---
+let forecastDays = 4;
+let currentLat = null;
+let currentLon = null;
+let currentName = null;
+
 // --- Vordefinierte Stationen ---
 const PRESET_STATIONS = [
   { name: 'Hamburg', lat: 53.5511, lon: 9.9937 },
@@ -123,12 +129,15 @@ async function searchLocation(query) {
 
 // --- Forecast ---
 async function loadForecast(lat, lon, name) {
+  currentLat = lat;
+  currentLon = lon;
+  currentName = name;
   loadingIndicator.style.display = 'inline';
   try {
     const params = [
       `latitude=${lat}`, `longitude=${lon}`,
       'hourly=temperature_2m,apparent_temperature,precipitation,precipitation_probability,weather_code,wind_speed_10m,wind_direction_10m,cloud_cover,surface_pressure,sunshine_duration',
-      'forecast_days=4', 'timezone=Europe/Berlin',
+      `forecast_days=${forecastDays}`, 'timezone=Europe/Berlin',
     ].join('&');
     const resp = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`);
     const data = await resp.json();
@@ -136,6 +145,18 @@ async function loadForecast(lat, lon, name) {
   } catch (e) { console.error('Forecast error:', e); }
   finally { loadingIndicator.style.display = 'none'; }
 }
+
+// --- Forecast Range Buttons ---
+document.querySelectorAll('.range-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    forecastDays = parseInt(btn.dataset.days, 10);
+    if (currentLat !== null) {
+      loadForecast(currentLat, currentLon, currentName);
+    }
+  });
+});
 
 // ============================================================
 // GRID SYSTEM: Unified alignment for ALL panels
@@ -163,16 +184,15 @@ function addDaySeparators(container) {
   });
 }
 
-// Add hourly grid lines (CSS gradient overlay: one thin line per hour)
+// Add hourly grid lines (positioned divs for pixel-perfect alignment)
 function addHourlyGrid(container) {
-  container.querySelectorAll('.hourly-grid').forEach(el => el.remove());
-  const grid = document.createElement('div');
-  grid.className = 'hourly-grid';
-  // One 1px line at the right edge of each hourly segment
-  grid.style.backgroundImage =
-    'linear-gradient(to right, transparent calc(100% - 1px), rgba(0,0,0,0.07) 1px)';
-  grid.style.backgroundSize = `calc(100% / ${N}) 100%`;
-  container.appendChild(grid);
+  container.querySelectorAll('.hourly-grid-line').forEach(el => el.remove());
+  for (let i = 1; i < N; i++) {
+    const line = document.createElement('div');
+    line.className = 'hourly-grid-line';
+    line.style.left = (i / N * 100) + '%';
+    container.appendChild(line);
+  }
 }
 
 // Add scale overlay (inside chart, right side)
@@ -228,6 +248,14 @@ function renderAll(data, stationName) {
 
   const windKnots = hourly.wind_speed_10m.map(v => v * KMH_TO_KNOTS);
 
+  // Set diagram width: same density as 4-day view, scroll for longer ranges
+  const inner = document.getElementById('diagram-inner');
+  const REF_CONTENT_WIDTH = 1000; // 4-day content area width (px)
+  const REF_HOURS = 96;
+  const pxPerHour = REF_CONTENT_WIDTH / REF_HOURS;
+  const minWidth = 100 + Math.round(N * pxPerHour);
+  inner.style.minWidth = minWidth + 'px';
+
   renderDayAxis(times);
   renderHourAxis(times);
   renderTemperature(times, hourly.temperature_2m, hourly.apparent_temperature);
@@ -266,11 +294,12 @@ function renderDayAxis(times) {
 function renderHourAxisInto(containerId, times) {
   const container = document.getElementById(containerId);
   container.innerHTML = '';
+  const labelMod = forecastDays <= 4 ? 3 : forecastDays <= 7 ? 6 : 12;
   times.forEach((t, i) => {
     const span = document.createElement('span');
     span.className = 'hour-mark';
     const h = t.getHours();
-    span.textContent = (h % 3 === 0) ? String(h).padStart(2, '0') : '';
+    span.textContent = (h % labelMod === 0) ? String(h).padStart(2, '0') : '';
     if (h === 0 && i > 0) span.classList.add('day-boundary');
     container.appendChild(span);
   });
@@ -366,13 +395,20 @@ function renderTemperature(times, temp, apparent) {
 }
 
 // --- Weather Symbols ---
+function getIconInterval() {
+  if (forecastDays <= 4) return { step: 3, flex: 3 };
+  if (forecastDays <= 7) return { step: 6, flex: 6 };
+  return { step: 12, flex: 12 };
+}
+
 function renderWeather(times, codes) {
   const container = document.getElementById('weather-panel');
   container.innerHTML = '';
-  for (let i = 0; i < times.length; i += 3) {
+  const { step, flex } = getIconInterval();
+  for (let i = 0; i < times.length; i += step) {
     const div = document.createElement('div');
     div.className = 'weather-icon-cell';
-    div.style.flex = '3';
+    div.style.flex = String(flex);
     const info = getWeatherIcon(codes[i]);
     div.textContent = info.icon;
     div.title = info.desc + ' (' + String(times[i].getHours()).padStart(2, '0') + ':00)';
@@ -384,10 +420,11 @@ function renderWeather(times, codes) {
 function renderWind(times, speedKnots, direction) {
   const container = document.getElementById('wind-panel');
   container.innerHTML = '';
-  for (let i = 0; i < times.length; i += 3) {
+  const { step, flex } = getIconInterval();
+  for (let i = 0; i < times.length; i += step) {
     const div = document.createElement('div');
     div.className = 'wind-cell';
-    div.style.flex = '3';
+    div.style.flex = String(flex);
     const arrow = degreesToArrow(direction[i]);
     const dir = degreesToDirection(direction[i]);
     const spd = Math.round(speedKnots[i]);
@@ -551,5 +588,8 @@ function groupByDay(times) {
 // --- Init ---
 document.addEventListener('DOMContentLoaded', () => {
   searchInput.value = 'Hamburg';
-  loadForecast(53.5511, 9.9937, 'Hamburg');
+  currentLat = 53.5511;
+  currentLon = 9.9937;
+  currentName = 'Hamburg';
+  loadForecast(currentLat, currentLon, currentName);
 });

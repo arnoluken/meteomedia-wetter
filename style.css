@@ -95,6 +95,61 @@ body {
   display: none;
 }
 
+/* --- Forecast Range Buttons --- */
+.forecast-range {
+  display: flex;
+  gap: 0;
+  margin-left: auto;
+}
+
+.range-btn {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 10px;
+  padding: 3px 8px;
+  border: 1px solid #999;
+  background: #e0e0e0;
+  color: #333;
+  cursor: pointer;
+  margin-left: -1px;
+}
+
+.range-btn:first-child {
+  border-radius: 3px 0 0 3px;
+  margin-left: 0;
+}
+
+.range-btn:last-child {
+  border-radius: 0 3px 3px 0;
+}
+
+.range-btn:hover {
+  background: #ccc;
+}
+
+.range-btn.active {
+  background: #005599;
+  color: #fff;
+  border-color: #004488;
+}
+
+/* --- Diagram Scroll Container --- */
+.diagram-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.diagram-inner {
+  min-width: 100%;
+}
+
+/* Sticky labels beim horizontalen Scrollen */
+.diagram-inner .panel-label,
+.diagram-inner .time-axis-label {
+  position: sticky;
+  left: 0;
+  z-index: 20;
+}
+
 /* --- Sub-Header --- */
 .sub-header {
   background: #f0f0f0;
@@ -241,13 +296,12 @@ body {
   padding: 0 1px;
 }
 
-/* --- Stündliche Hilfslinien (CSS-Gradient-Overlay) --- */
-.hourly-grid {
+/* --- Stündliche Hilfslinien (positionierte Divs) --- */
+.hourly-grid-line {
   position: absolute;
   top: 0;
-  left: 0;
-  right: 0;
   bottom: 0;
+  border-left: 1px solid rgba(0,0,0,0.07);
   z-index: 1;
   pointer-events: none;
 }
