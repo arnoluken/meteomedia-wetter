@@ -136,7 +136,7 @@ async function loadForecast(lat, lon, name) {
   try {
     const params = [
       `latitude=${lat}`, `longitude=${lon}`,
-      'hourly=temperature_2m,apparent_temperature,precipitation,precipitation_probability,weather_code,wind_speed_10m,wind_direction_10m,cloud_cover,surface_pressure,sunshine_duration',
+      'hourly=temperature_2m,apparent_temperature,precipitation,precipitation_probability,weather_code,wind_speed_10m,wind_direction_10m,cloud_cover,surface_pressure,direct_radiation',
       `forecast_days=${forecastDays}`, 'timezone=Europe/Berlin',
     ].join('&');
     const resp = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`);
@@ -268,7 +268,7 @@ function renderAll(data, stationName) {
   renderWindChart(times, windKnots);
   renderBars('precip-prob-panel', hourly.precipitation_probability, 'bar-precip-prob', 100);
   renderBars('precip-panel', hourly.precipitation, 'bar-precip');
-  renderSunshineBars(hourly.sunshine_duration);
+  renderSunshineBars(hourly.direct_radiation);
   renderBars('clouds-panel', hourly.cloud_cover, 'bar-clouds', 100);
   renderPressure(times, hourly.surface_pressure);
 
@@ -499,14 +499,15 @@ function renderBars(containerId, values, barClass, maxVal) {
   });
 }
 
-// --- Sunshine Bars ---
+// --- Sunshine Bars (direct radiation) ---
 function renderSunshineBars(values) {
   const container = document.getElementById('sunshine-panel');
   container.innerHTML = '';
+  const max = Math.max(...values, 1);
   values.forEach(v => {
     const div = document.createElement('div');
     div.className = 'bar bar-sunshine';
-    const pct = Math.max(0, (v / 3600) * 100);
+    const pct = Math.max(0, (v / max) * 100);
     div.style.height = pct + '%';
     if (pct === 0) {
       div.style.background = 'transparent';
