@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vorhersagediagramm — Meteomedia Style</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <div class="header">
+      <span class="header-info" id="header-info">
+        <b>Vorhersagediagramm</b> für die Station <b id="station-name">—</b> vom <span id="header-date">—</span> Uhr (alle Zeiten in MEZ)
+      </span>
+      <span class="header-logo">I+I Meteomedia</span>
+    </div>
+
+    <!-- Orts-Suche (kompakt im Header-Bereich) -->
+    <div class="search-bar">
+      <label for="search-input">Station:</label>
+      <input type="text" id="search-input" placeholder="Ort eingeben…" autocomplete="off">
+      <span id="loading-indicator">Laden…</span>
+      <div id="search-results"></div>
+    </div>
+
+    <!-- Zusatzzeile wie im Original: Empfind.KP Minimum -->
+    <div class="sub-header">
+      <span class="sub-header-label">Empfind./KP-</span>
+      <span class="sub-header-label">Temperatur-Minimum</span>
+    </div>
+
+    <!-- Tagesleiste -->
+    <div class="time-axis" id="day-axis">
+      <div class="time-axis-label"></div>
+      <div class="time-axis-days" id="day-labels"></div>
+    </div>
+
+    <!-- Stundenleiste -->
+    <div class="time-axis-hours" id="hour-axis">
+      <div class="time-axis-label"></div>
+      <div class="time-axis-hours-container" id="hour-labels"></div>
+    </div>
+
+    <!-- Panel 1: Temperatur -->
+    <div class="panel panel-temperature">
+      <div class="panel-label">
+        <b>Temperatur</b>
+        <span style="font-size:8px;"><span style="color:#cc0000;">—</span> Temperatur °C</span>
+        <span style="font-size:8px;"><span style="color:#0066aa;">---</span> Empf./KP-Temp. °C</span>
+      </div>
+      <div class="panel-content" id="temp-panel">
+        <canvas id="temp-chart" class="temp-canvas"></canvas>
+      </div>
+    </div>
+
+    <!-- Panel 2: Wetter-Symbole -->
+    <div class="panel panel-weather">
+      <div class="panel-label"><b>Wetter</b></div>
+      <div class="panel-content" id="weather-panel"></div>
+    </div>
+
+    <!-- Panel 3: Wind (Text: Richtung + km/h) -->
+    <div class="panel panel-wind">
+      <div class="panel-label">
+        <b>Wind</b>
+        <span>Richtung + kn</span>
+      </div>
+      <div class="panel-content" id="wind-panel"></div>
+    </div>
+
+    <!-- Panel 3b: Wind-Diagramm (Geschwindigkeit) -->
+    <div class="panel panel-wind-chart">
+      <div class="panel-label">
+        <b>Windstärke</b>
+        <span>kn</span>
+      </div>
+      <div class="panel-content" id="wind-chart-panel">
+        <canvas id="wind-chart" class="wind-chart-canvas"></canvas>
+      </div>
+    </div>
+
+    <!-- Panel 4: Niederschlagswahrscheinlichkeit -->
+    <div class="panel panel-precip-prob">
+      <div class="panel-label">
+        <b>NiederschlagsWS</b>
+        <span>in %</span>
+      </div>
+      <div class="panel-content" id="precip-prob-panel"></div>
+    </div>
+
+    <!-- Panel 5: Niederschlag -->
+    <div class="panel panel-precipitation">
+      <div class="panel-label">
+        <b>Niederschlag</b>
+        <span>in mm</span>
+      </div>
+      <div class="panel-content" id="precip-panel"></div>
+    </div>
+
+    <!-- Panel 6: Sonnenschein -->
+    <div class="panel panel-sunshine">
+      <div class="panel-label">
+        <b>Sonnenschein</b>
+        <span>Min./Std.</span>
+      </div>
+      <div class="panel-content" id="sunshine-panel"></div>
+    </div>
+
+    <!-- Panel 6: Bewölkung -->
+    <div class="panel panel-clouds">
+      <div class="panel-label">
+        <b>Bewölkung</b>
+        <span>in %</span>
+      </div>
+      <div class="panel-content" id="clouds-panel"></div>
+    </div>
+
+    <!-- Panel 7: Luftdruck -->
+    <div class="panel panel-pressure">
+      <div class="panel-label">
+        <b>Luftdruck</b>
+        <span>in hPa</span>
+      </div>
+      <div class="panel-content" id="pressure-panel">
+        <canvas id="pressure-chart" class="pressure-canvas"></canvas>
+      </div>
+    </div>
+
+    <!-- Stundenleiste unten -->
+    <div class="time-axis-hours" id="hour-axis-bottom">
+      <div class="time-axis-label"></div>
+      <div class="time-axis-hours-container" id="hour-labels-bottom"></div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">wetterstationen.meteomedia.de</div>
+  </div>
+
+  <script src="weather-icons.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
