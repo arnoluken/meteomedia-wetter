@@ -248,13 +248,17 @@ function renderAll(data, stationName) {
 
   const windKnots = hourly.wind_speed_10m.map(v => v * KMH_TO_KNOTS);
 
-  // Set diagram width: same density as 4-day view, scroll for longer ranges
+  // Set diagram width: 4 days fits viewport, longer ranges scroll proportionally
   const inner = document.getElementById('diagram-inner');
-  const REF_CONTENT_WIDTH = 1000; // 4-day content area width (px)
-  const REF_HOURS = 96;
-  const pxPerHour = REF_CONTENT_WIDTH / REF_HOURS;
-  const minWidth = 100 + Math.round(N * pxPerHour);
-  inner.style.minWidth = minWidth + 'px';
+  if (forecastDays <= 4) {
+    inner.style.minWidth = '';
+  } else {
+    const scrollContainer = document.getElementById('diagram-scroll');
+    const containerWidth = scrollContainer.clientWidth;
+    const scale = N / 96; // ratio to 4-day baseline
+    const minWidth = Math.round(containerWidth * scale);
+    inner.style.minWidth = minWidth + 'px';
+  }
 
   renderDayAxis(times);
   renderHourAxis(times);
