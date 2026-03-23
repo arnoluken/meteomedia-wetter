@@ -141,6 +141,25 @@ body {
 
 .diagram-inner {
   min-width: 100%;
+  position: relative;
+}
+
+/* Full-height day separator overlay */
+.day-sep-overlay-container {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 100px;
+  right: 0;
+  pointer-events: none;
+  z-index: 50;
+}
+
+.day-sep-full-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-left: 2px solid #888;
 }
 
 /* Sticky labels beim horizontalen Scrollen */
@@ -307,15 +326,7 @@ body {
   pointer-events: none;
 }
 
-/* --- Tages-Trennlinien (CSS-Overlay) --- */
-.day-sep-overlay {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  border-left: 2px solid #888;
-  z-index: 5;
-  pointer-events: none;
-}
+/* old per-panel day-sep-overlay no longer used */
 
 /* --- Temperatur --- */
 .panel-temperature .panel-content { height: 120px; }
@@ -427,6 +438,8 @@ body {
     min-width: 50px;
     font-size: 7px;
   }
+
+  .day-sep-overlay-container { left: 50px; }
 
   #search-input { width: 120px; font-size: 11px; }
 

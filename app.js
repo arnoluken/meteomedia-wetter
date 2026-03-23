@@ -223,34 +223,22 @@ function addScaleLeft(panelLabelEl, ticks) {
   panelLabelEl.appendChild(col);
 }
 
-// Apply grid + day separators to a panel-content element
+// Apply hourly grid only (no per-panel day separators)
 function applyGrid(container) {
   addHourlyGrid(container);
-  addDaySeparators(container);
 }
 
-// Chart.js plugin: draw day separators using chart coordinates (pixel-perfect)
-const daySepPlugin = {
-  id: 'daySep',
-  afterDraw(chart) {
-    const { ctx, chartArea, scales } = chart;
-    if (!chartArea) return;
-    const xScale = scales.x;
-    const { top, bottom } = chartArea;
-    ctx.save();
-    ctx.strokeStyle = '#888';
-    ctx.lineWidth = 2;
-    dayBoundaryIndices.forEach(idx => {
-      // idx - 0.5 = left edge of slot idx = the day boundary
-      const x = xScale.getPixelForValue(idx - 0.5);
-      ctx.beginPath();
-      ctx.moveTo(x, top);
-      ctx.lineTo(x, bottom);
-      ctx.stroke();
-    });
-    ctx.restore();
-  }
-};
+// Single full-height day separator overlay spanning all panels
+function renderDaySeparatorOverlay() {
+  const container = document.getElementById('day-sep-overlay');
+  container.innerHTML = '';
+  dayBoundaryIndices.forEach(idx => {
+    const line = document.createElement('div');
+    line.className = 'day-sep-full-line';
+    line.style.left = (idx / N * 100) + '%';
+    container.appendChild(line);
+  });
+}
 
 // ============================================================
 // RENDER
@@ -295,16 +283,11 @@ function renderAll(data, stationName) {
   renderBars('clouds-panel', hourly.cloud_cover, 'bar-clouds', 100);
   renderPressure(times, hourly.surface_pressure);
 
-  // Apply unified grid to ALL panel-content elements
-  // Skip chart panels — they draw day separators via Chart.js plugin
-  const chartPanelIds = ['temp-panel', 'wind-chart-panel', 'pressure-panel'];
-  document.querySelectorAll('.panel-content').forEach(el => {
-    if (chartPanelIds.includes(el.id)) {
-      addHourlyGrid(el);
-    } else {
-      applyGrid(el);
-    }
-  });
+  // Apply hourly grid to all panels
+  document.querySelectorAll('.panel-content').forEach(el => applyGrid(el));
+
+  // Single overlay for day separators spanning all panels
+  renderDaySeparatorOverlay();
 }
 
 // --- Day Axis ---
@@ -421,7 +404,7 @@ function renderTemperature(times, temp, apparent) {
       },
       layout: { padding: 0 },
     },
-    plugins: [tempPlugin, daySepPlugin],
+    plugins: [tempPlugin],
   });
 
   // Scale ticks
@@ -507,7 +490,7 @@ function renderWindChart(times, speedKnots) {
       },
       layout: { padding: 0 },
     },
-    plugins: [daySepPlugin],
+    plugins: [],
   });
 
   const step = maxWind <= 20 ? 5 : 10;
@@ -602,7 +585,7 @@ function renderPressure(times, pressure) {
       },
       layout: { padding: 0 },
     },
-    plugins: [gridPlugin, daySepPlugin],
+    plugins: [gridPlugin],
   });
 
   const ticks = [];
