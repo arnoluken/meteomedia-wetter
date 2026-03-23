@@ -318,25 +318,25 @@ body {
 }
 
 /* --- Temperatur --- */
-.panel-temperature .panel-content { height: 150px; }
+.panel-temperature .panel-content { height: 120px; }
 .temp-canvas { width: 100%; height: 100%; display: block; }
 
 /* --- Wetter-Symbole --- */
 .panel-weather .panel-content {
-  height: 32px;
+  height: 20px;
   display: flex;
   align-items: center;
 }
 
 .weather-icon-cell {
   text-align: center;
-  font-size: 15px;
+  font-size: 12px;
   line-height: 1;
 }
 
 /* --- Wind --- */
 .panel-wind .panel-content {
-  height: 42px;
+  height: 28px;
   display: flex;
   align-items: center;
 }
@@ -344,11 +344,11 @@ body {
 .wind-cell {
   text-align: center;
   font-size: 7px;
-  line-height: 1.3;
+  line-height: 1.1;
 }
 
 .wind-arrow {
-  font-size: 13px;
+  font-size: 10px;
   display: block;
 }
 
