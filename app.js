@@ -304,8 +304,13 @@ function renderHourAxisInto(containerId, times) {
     span.className = 'hour-mark';
     const h = t.getHours();
     span.textContent = (h % labelMod === 0) ? String(h).padStart(2, '0') : '';
-    if (h === 0 && i > 0) span.classList.add('day-boundary');
     container.appendChild(span);
+  });
+  // Day boundary: border-right on the LAST hour of the previous day (index before midnight)
+  times.forEach((t, i) => {
+    if (t.getHours() === 0 && i > 0) {
+      container.children[i - 1].classList.add('day-boundary');
+    }
   });
 }
 
@@ -380,10 +385,10 @@ function renderTemperature(times, temp, apparent) {
         },
       },
       scales: {
-        x: { type: 'linear', display: false, min: -0.5, max: N - 0.5 },
-        y: { display: false, min: minVal, max: maxVal },
+        x: { type: 'linear', display: false, min: -0.5, max: N - 0.5, afterFit: s => { s.height = 0; } },
+        y: { display: false, min: minVal, max: maxVal, afterFit: s => { s.width = 0; } },
       },
-      layout: { padding: { left: 0, right: 0, top: 2, bottom: 2 } },
+      layout: { padding: 0 },
     },
     plugins: [tempPlugin],
   });
@@ -466,10 +471,10 @@ function renderWindChart(times, speedKnots) {
         },
       },
       scales: {
-        x: { type: 'linear', display: false, min: -0.5, max: N - 0.5 },
-        y: { display: false, beginAtZero: true, max: maxWind },
+        x: { type: 'linear', display: false, min: -0.5, max: N - 0.5, afterFit: s => { s.height = 0; } },
+        y: { display: false, beginAtZero: true, max: maxWind, afterFit: s => { s.width = 0; } },
       },
-      layout: { padding: { left: 0, right: 0, top: 2, bottom: 2 } },
+      layout: { padding: 0 },
     },
     plugins: [], // NO plugins — CSS handles all grid/separators
   });
@@ -561,16 +566,17 @@ function renderPressure(times, pressure) {
         },
       },
       scales: {
-        x: { type: 'linear', display: false, min: -0.5, max: N - 0.5 },
-        y: { display: false, min: minP, max: maxP },
+        x: { type: 'linear', display: false, min: -0.5, max: N - 0.5, afterFit: s => { s.height = 0; } },
+        y: { display: false, min: minP, max: maxP, afterFit: s => { s.width = 0; } },
       },
-      layout: { padding: { left: 0, right: 0, top: 2, bottom: 2 } },
+      layout: { padding: 0 },
     },
     plugins: [gridPlugin],
   });
 
   const ticks = [];
   for (let v = maxP; v >= minP; v -= 5) ticks.push(v.toLocaleString('de-DE'));
+  addScaleLeft(document.querySelector('.panel-pressure .panel-label'), ticks);
   addScaleOverlayRight(document.getElementById('pressure-panel'), ticks);
 }
 

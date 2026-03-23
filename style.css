@@ -261,7 +261,7 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 2px 2px;
+  padding: 0 2px;
   pointer-events: none;
   border-left: 1px solid #ddd;
 }
@@ -285,7 +285,7 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 2px 2px;
+  padding: 0 2px;
 }
 
 .scale-overlay .scale-tick {
