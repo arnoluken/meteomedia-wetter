@@ -458,5 +458,8 @@ body {
   .weather-icon-cell { font-size: 12px; }
   .wind-cell { font-size: 6px; }
   .wind-arrow { font-size: 10px; }
-  .label-scale { display: none; }
+  .label-scale {
+    width: 18px;
+    font-size: 6px;
+  }
 }

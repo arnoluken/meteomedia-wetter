@@ -312,7 +312,7 @@ function renderDayAxis(times) {
 function renderHourAxisInto(containerId, times) {
   const container = document.getElementById(containerId);
   container.innerHTML = '';
-  const labelMod = forecastDays <= 4 ? 3 : forecastDays <= 7 ? 6 : 12;
+  const labelMod = forecastDays <= 1 ? 1 : forecastDays <= 4 ? 3 : forecastDays <= 7 ? 6 : 12;
   times.forEach((t, i) => {
     const span = document.createElement('span');
     span.className = 'hour-mark';
@@ -419,6 +419,7 @@ function renderTemperature(times, temp, apparent) {
 
 // --- Weather Symbols ---
 function getIconInterval() {
+  if (forecastDays <= 1) return { step: 1, flex: 1 };
   if (forecastDays <= 4) return { step: 3, flex: 3 };
   if (forecastDays <= 7) return { step: 6, flex: 6 };
   return { step: 12, flex: 12 };
