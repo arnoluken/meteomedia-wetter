@@ -370,6 +370,7 @@ body {
 /* --- Balken-Panels --- */
 .panel-precip-prob .panel-content,
 .panel-precipitation .panel-content,
+.panel-snowfall .panel-content,
 .panel-sunshine .panel-content,
 .panel-clouds .panel-content {
   height: 40px;
@@ -386,6 +387,12 @@ body {
 
 .bar-precip-prob { background: #88bbdd; }
 .bar-precip { background: #3377bb; }
+
+.bar-snowfall {
+  background: #99ccff;
+  border-right: 1px solid #6699cc;
+}
+.bar-snowfall:last-child { border-right: none; }
 
 .bar-sunshine {
   background: #ddaa00;
