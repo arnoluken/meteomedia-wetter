@@ -278,9 +278,17 @@ function renderAll(data, stationName) {
   renderWind(times, windKnots, hourly.wind_direction_10m);
   renderWindChart(times, windKnots);
   renderBars('precip-prob-panel', hourly.precipitation_probability, 'bar-precip-prob', 100);
-  renderBars('precip-panel', hourly.precipitation, 'bar-precip');
-  renderBars('snowfall-panel', hourly.snowfall, 'bar-snowfall');
-  renderSunshineBars(hourly.direct_radiation);
+  const precipMax = niceBarMax(Math.max(...hourly.precipitation, 1));
+  renderBars('precip-panel', hourly.precipitation, 'bar-precip', precipMax);
+  addBarScales('.panel-precipitation', 'precip-panel', precipMax);
+
+  const snowMax = niceBarMax(Math.max(...hourly.snowfall, 0.1));
+  renderBars('snowfall-panel', hourly.snowfall, 'bar-snowfall', snowMax);
+  addBarScales('.panel-snowfall', 'snowfall-panel', snowMax);
+
+  const sunMax = niceBarMax(Math.max(...hourly.direct_radiation, 1));
+  renderSunshineBars(hourly.direct_radiation, sunMax);
+  addBarScales('.panel-sunshine', 'sunshine-panel', sunMax);
   renderBars('clouds-panel', hourly.cloud_cover, 'bar-clouds', 100);
   renderPressure(times, hourly.surface_pressure);
 
@@ -505,6 +513,31 @@ function renderWindChart(times, speedKnots) {
   addScaleOverlayRight(document.getElementById('wind-chart-panel'), ticks);
 }
 
+// --- Nice rounding for bar scale max ---
+function niceBarMax(rawMax) {
+  if (rawMax <= 0.5) return 0.5;
+  if (rawMax <= 1) return 1;
+  if (rawMax <= 2) return 2;
+  if (rawMax <= 5) return 5;
+  if (rawMax <= 10) return 10;
+  if (rawMax <= 20) return 20;
+  if (rawMax <= 50) return 50;
+  if (rawMax <= 100) return 100;
+  if (rawMax <= 200) return 200;
+  if (rawMax <= 500) return 500;
+  return Math.ceil(rawMax / 100) * 100;
+}
+
+function formatTickDE(v) {
+  return v % 1 === 0 ? String(v) : v.toLocaleString('de-DE');
+}
+
+function addBarScales(panelSelector, containerId, max) {
+  const ticks = [formatTickDE(max), formatTickDE(max / 2), '0'];
+  addScaleLeft(document.querySelector(panelSelector + ' .panel-label'), ticks);
+  addScaleOverlayRight(document.getElementById(containerId), ticks);
+}
+
 // --- Bar Charts ---
 function renderBars(containerId, values, barClass, maxVal) {
   const container = document.getElementById(containerId);
@@ -521,10 +554,10 @@ function renderBars(containerId, values, barClass, maxVal) {
 }
 
 // --- Sunshine Bars (direct radiation) ---
-function renderSunshineBars(values) {
+function renderSunshineBars(values, maxVal) {
   const container = document.getElementById('sunshine-panel');
   container.innerHTML = '';
-  const max = Math.max(...values, 1);
+  const max = maxVal || Math.max(...values, 1);
   values.forEach(v => {
     const div = document.createElement('div');
     div.className = 'bar bar-sunshine';
