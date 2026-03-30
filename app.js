@@ -429,6 +429,7 @@ function renderTemperature(times, temp, apparent) {
 // --- Weather Symbols ---
 function getIconInterval() {
   if (forecastDays <= 1) return { step: 1, flex: 1 };
+  if (forecastDays <= 2) return { step: 3, flex: 3 };
   if (forecastDays <= 4) return { step: 3, flex: 3 };
   if (forecastDays <= 7) return { step: 6, flex: 6 };
   return { step: 12, flex: 12 };
